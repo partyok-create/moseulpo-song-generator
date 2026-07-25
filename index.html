@@ -236,11 +236,15 @@
       <textarea id="imgScene" placeholder="예: 창가에 앉아 커피를 마시는 뒷모습, 제주 바다를 바라보는 사람, 노을이 지는 카페 풍경..."></textarea>
 
       <div id="apiGenBlock" style="margin-top:14px;padding-top:14px;border-top:1px dashed var(--border);">
-        <label>Gemini(나노바나나) API 키 <span style="font-weight:400;">— 이 기기에만 저장돼요</span></label>
-        <input type="text" id="apiKey" placeholder="AIza... 형태의 API 키를 붙여넣어주세요">
+        <label>Gemini(나노바나나) API 키 <span style="font-weight:400;">— 이 기기에만 저장돼요, 화면엔 보이지 않아요</span></label>
+        <div style="display:flex;gap:8px;">
+          <input type="password" id="apiKey" placeholder="AIza... 형태의 API 키를 붙여넣어주세요" style="flex:1;" autocomplete="off">
+          <button type="button" class="copy-btn" style="white-space:nowrap;padding:10px 14px;" onclick="toggleKeyVisibility()" id="keyToggleBtn">보기</button>
+        </div>
         <div style="font-size:12px;color:var(--ink-soft);margin-top:6px;line-height:1.6;">
           Google AI Studio(aistudio.google.com/apikey)에서 무료로 발급받을 수 있어요. 이미지 생성 1건당 소액의 사용료가 부과되며, 키가 없으면 아래 ③번 프롬프트를 복사해 나노바나나 웹/앱에 직접 붙여넣어도 돼요.
         </div>
+        <button type="button" onclick="clearApiKey()" style="margin-top:8px;background:none;border:none;color:var(--ink-soft);font-size:12px;text-decoration:underline;cursor:pointer;padding:0;">이 기기에서 키 삭제 (행사 끝나면 눌러주세요)</button>
         <button type="button" class="copy-btn" style="margin-top:10px;" onclick="callNanoBanana()">🍌 이미지 바로 생성하기</button>
         <div id="apiStatus" style="font-size:12px;color:var(--ink-soft);margin-top:8px;"></div>
         <div id="genImageWrap" class="hidden" style="margin-top:12px;text-align:center;">
@@ -325,6 +329,27 @@ window.addEventListener('DOMContentLoaded', function(){
   var saved = localStorage.getItem('nanoBananaApiKey');
   if(saved){ document.getElementById('apiKey').value = saved; }
 });
+
+function toggleKeyVisibility(){
+  var input = document.getElementById('apiKey');
+  var btn = document.getElementById('keyToggleBtn');
+  if(input.type === 'password'){
+    input.type = 'text';
+    btn.textContent = '숨기기';
+  } else {
+    input.type = 'password';
+    btn.textContent = '보기';
+  }
+}
+
+function clearApiKey(){
+  localStorage.removeItem('nanoBananaApiKey');
+  document.getElementById('apiKey').value = '';
+  document.getElementById('apiKey').type = 'password';
+  document.getElementById('keyToggleBtn').textContent = '보기';
+  var statusEl = document.getElementById('apiStatus');
+  if(statusEl){ statusEl.textContent = '이 기기에 저장된 API 키를 삭제했어요.'; }
+}
 
 var genreTagMap = {
   "트로트": "Korean trot, nostalgic melody, accordion & trumpet",
