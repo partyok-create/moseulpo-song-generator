@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>나만의 노래 만들기 - 프롬프트 생성기</title>
+<style>
+  :root{
+    --cream:#FAF5EA;
+    --cream-deep:#F1E7D3;
+    --paper:#FFFDF9;
+    --gold:#B8862F;
+    --gold-light:#D9A94F;
+    --ink:#2E2A24;
+    --ink-soft:#5B5347;
+    --navy:#2B3140;
+    --border:#E5D9BE;
+    --shadow:0 8px 24px rgba(60,45,10,0.08);
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+    background:linear-gradient(180deg,var(--cream) 0%,var(--cream-deep) 100%);
+    color:var(--ink);
+    padding:24px 16px 64px;
+  }
+  .wrap{max-width:720px;margin:0 auto;}
+  header{text-align:center;margin-bottom:28px;}
+  header .badge{
+    display:inline-block;background:var(--gold);color:#fff;font-size:12px;
+    letter-spacing:0.08em;padding:4px 12px;border-radius:999px;margin-bottom:10px;
+  }
+  header h1{font-size:22px;margin:6px 0 6px;color:var(--navy);}
+  header p{font-size:14px;color:var(--ink-soft);margin:0;line-height:1.6;}
+
+  .card{
+    background:var(--paper);
+    border:1px solid var(--border);
+    border-radius:18px;
+    padding:20px 20px 22px;
+    margin-bottom:16px;
+    box-shadow:var(--shadow);
+  }
+  .card h2{
+    font-size:15px;margin:0 0 14px;color:var(--navy);
+    display:flex;align-items:center;gap:8px;
+  }
+  .card h2 .num{
+    width:22px;height:22px;border-radius:50%;background:var(--gold);
+    color:#fff;font-size:12px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;
+  }
+  label{display:block;font-size:13px;color:var(--ink-soft);margin:12px 0 6px;}
+  label:first-of-type{margin-top:0;}
+  select, input[type=text], textarea{
+    width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:10px;
+    font-size:14px;background:#fff;color:var(--ink);font-family:inherit;
+  }
+  textarea{resize:vertical;min-height:70px;line-height:1.5;}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  @media(max-width:520px){.grid2{grid-template-columns:1fr;}}
+
+  .radio-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:4px;}
+  .radio-opt{
+    flex:1;min-width:150px;border:1px solid var(--border);border-radius:12px;
+    padding:12px;cursor:pointer;font-size:13px;color:var(--ink-soft);text-align:center;
+    transition:all .15s;
+  }
+  .radio-opt input{display:none;}
+  .radio-opt.active{border-color:var(--gold);background:#FBF1DC;color:var(--navy);font-weight:600;}
+
+  .hidden{display:none !important;}
+
+  .btn-main{
+    width:100%;padding:14px;border:none;border-radius:12px;background:var(--navy);
+    color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:6px;
+  }
+  .btn-main:active{opacity:0.85;}
+
+  .result-card{border-left:4px solid var(--gold);}
+  .result-card h2{color:var(--navy);}
+  .prompt-box{
+    background:#FBF7EE;border:1px solid var(--border);border-radius:10px;
+    padding:14px;font-size:13px;line-height:1.7;white-space:pre-wrap;color:var(--ink);
+    max-height:260px;overflow-y:auto;
+  }
+  .copy-btn{
+    margin-top:10px;padding:8px 14px;border:1px solid var(--gold);background:#fff;
+    color:var(--gold);border-radius:8px;font-size:13px;cursor:pointer;font-weight:600;
+  }
+  .copy-btn.copied{background:var(--gold);color:#fff;}
+
+  .steps{
+    background:var(--navy);color:#F1E7D3;border-radius:16px;padding:18px 20px;
+    font-size:13px;line-height:1.9;margin-top:8px;
+  }
+  .steps b{color:#F5D98A;}
+
+  #resultSection{display:none;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <span class="badge">모슬포 카페 · 번아웃 충전</span>
+    <h1>🎵 나만의 노래 만들기</h1>
+    <p>아래 질문에 답해주시면 가사·음악·이미지 생성용 프롬프트가<br>자동으로 만들어져요.</p>
+  </header>
+
+  <!-- STEP 1 -->
+  <div class="card">
+    <h2><span class="num">1</span> 기본 정보</h2>
+    <div class="grid2">
+      <div>
+        <label>연령대</label>
+        <select id="age">
+          <option>10대</option>
+          <option>20대</option>
+          <option>30대</option>
+          <option selected>40대</option>
+          <option>50대</option>
+          <option>60대</option>
+          <option>70대 이상</option>
+        </select>
+      </div>
+      <div>
+        <label>노래 취향(장르)</label>
+        <select id="genre">
+          <option>트로트</option>
+          <option selected>발라드</option>
+          <option>락</option>
+          <option>팝</option>
+          <option>가곡</option>
+          <option>재즈</option>
+          <option>어쿠스틱</option>
+          <option>국악/전통풍</option>
+          <option value="기타">기타(직접 입력)</option>
+        </select>
+        <input type="text" id="genreCustom" class="hidden" placeholder="원하는 장르를 적어주세요" style="margin-top:8px;">
+      </div>
+    </div>
+    <label>원하는 분위기</label>
+    <select id="mood">
+      <option>신나고 경쾌한</option>
+      <option selected>잔잔하고 편안한</option>
+      <option>뭉클하고 감동적인</option>
+      <option>위로와 응원</option>
+      <option>그리운 / 추억</option>
+      <option>희망차고 다짐하는</option>
+    </select>
+  </div>
+
+  <!-- STEP 2 -->
+  <div class="card">
+    <h2><span class="num">2</span> 노래에 담고 싶은 이야기</h2>
+    <label>사연, 사람, 장소, 추억을 자유롭게 적어주세요</label>
+    <textarea id="story" placeholder="예: 매일 아침 커피 내려주시던 아버지, 제주 바다가 보이던 그 여름, 힘들 때마다 곁을 지켜준 친구 이야기..."></textarea>
+  </div>
+
+  <!-- STEP 3 -->
+  <div class="card">
+    <h2><span class="num">3</span> 목소리 톤</h2>
+    <div class="grid2">
+      <div>
+        <label>보컬 느낌</label>
+        <select id="voiceGender">
+          <option>여성스럽고 맑은</option>
+          <option>남성스럽고 묵직한</option>
+          <option>중성적이고 부드러운</option>
+          <option selected>장르에 어울리게 (상관없음)</option>
+        </select>
+      </div>
+      <div>
+        <label>음색</label>
+        <select id="voiceTone">
+          <option>맑고 청아한</option>
+          <option>허스키하고 깊은</option>
+          <option selected>부드럽고 따뜻한</option>
+          <option>파워풀하고 시원한</option>
+          <option>잔잔하고 나긋한</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 4 -->
+  <div class="card">
+    <h2><span class="num">4</span> 영상에 넣을 이미지</h2>
+    <div class="radio-row" id="imageModeRow">
+      <label class="radio-opt active" data-value="upload">
+        <input type="radio" name="imageMode" value="upload" checked>
+        📷 참가자 사진 직접 업로드
+      </label>
+      <label class="radio-opt" data-value="generate">
+        <input type="radio" name="imageMode" value="generate">
+        🍌 나노바나나로 이미지 생성
+      </label>
+    </div>
+
+    <div id="uploadFields">
+      <label>참가자 사진을 선택해주세요</label>
+      <input type="file" id="photoUpload" accept="image/*">
+      <div id="photoPreviewWrap" class="hidden" style="margin-top:12px;text-align:center;">
+        <img id="photoPreview" style="max-width:100%;max-height:220px;border-radius:12px;border:1px solid var(--border);">
+        <div id="photoFileName" style="font-size:12px;color:var(--ink-soft);margin-top:6px;"></div>
+      </div>
+    </div>
+
+    <div id="imageGenFields" class="hidden">
+      <label>원하는 색감 / 톤</label>
+      <select id="imgColor">
+        <option>따뜻한 골드톤</option>
+        <option>파스텔톤</option>
+        <option>흑백 / 세피아 감성</option>
+        <option>청량한 블루톤</option>
+        <option>제주 자연톤 (초록·바다)</option>
+      </select>
+      <label>원하는 장면 묘사 (선택)</label>
+      <textarea id="imgScene" placeholder="예: 창가에 앉아 커피를 마시는 뒷모습, 제주 바다를 바라보는 사람, 노을이 지는 카페 풍경..."></textarea>
+
+      <div id="apiGenBlock" style="margin-top:14px;padding-top:14px;border-top:1px dashed var(--border);">
+        <label>Gemini(나노바나나) API 키 <span style="font-weight:400;">— 이 기기에만 저장돼요</span></label>
+        <input type="text" id="apiKey" placeholder="AIza... 형태의 API 키를 붙여넣어주세요">
+        <div style="font-size:12px;color:var(--ink-soft);margin-top:6px;line-height:1.6;">
+          Google AI Studio(aistudio.google.com/apikey)에서 무료로 발급받을 수 있어요. 이미지 생성 1건당 소액의 사용료가 부과되며, 키가 없으면 아래 ③번 프롬프트를 복사해 나노바나나 웹/앱에 직접 붙여넣어도 돼요.
+        </div>
+        <button type="button" class="copy-btn" style="margin-top:10px;" onclick="callNanoBanana()">🍌 이미지 바로 생성하기</button>
+        <div id="apiStatus" style="font-size:12px;color:var(--ink-soft);margin-top:8px;"></div>
+        <div id="genImageWrap" class="hidden" style="margin-top:12px;text-align:center;">
+          <img id="genImagePreview" style="max-width:100%;max-height:260px;border-radius:12px;border:1px solid var(--border);">
+          <div style="margin-top:8px;">
+            <a id="genImageDownload" download="나만의노래_이미지.png" class="copy-btn" style="text-decoration:none;display:inline-block;">이미지 다운로드</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <button class="btn-main" onclick="generatePrompts()">✨ 프롬프트 만들기</button>
+
+  <!-- RESULT -->
+  <div id="resultSection">
+
+    <div class="card result-card">
+      <h2>🎤 ① 가사(노랫말) 생성 프롬프트</h2>
+      <div class="prompt-box" id="lyricsPrompt"></div>
+      <button class="copy-btn" onclick="copyBox('lyricsPrompt', this)">복사하기</button>
+    </div>
+
+    <div class="card result-card">
+      <h2>🎼 ② Suno 음악 생성 프롬프트</h2>
+      <div class="prompt-box" id="sunoPrompt"></div>
+      <button class="copy-btn" onclick="copyBox('sunoPrompt', this)">복사하기</button>
+    </div>
+
+    <div class="card result-card hidden" id="imagePromptCard">
+      <h2>🖼️ ③ 나노바나나 이미지 생성 프롬프트</h2>
+      <div class="prompt-box" id="imagePrompt"></div>
+      <button class="copy-btn" onclick="copyBox('imagePrompt', this)">복사하기</button>
+    </div>
+
+    <div class="steps">
+      <b>다음 단계 안내</b><br>
+      1. ①번 프롬프트를 ChatGPT/Claude에 붙여넣어 가사를 만들어요.<br>
+      2. 완성된 가사를 ②번 프롬프트와 함께 Suno에 입력해 노래를 생성해요.<br>
+      3. (선택) ③번 프롬프트를 위쪽 "이미지 바로 생성하기" 버튼으로 자동 생성하거나, 나노바나나 웹/앱에 직접 붙여넣어요. 참가자 사진을 쓸 경우 4단계의 업로드 파일을 그대로 사용해요.<br>
+      4. 음악 파일과 이미지를 영상 편집 툴(캡컷, 브루 등)로 합쳐 mp4를 완성해요.
+    </div>
+
+    <button class="btn-main" style="background:#8a7a55;margin-top:14px;" onclick="resetForm()">🔄 다음 참가자 - 새로 만들기</button>
+  </div>
+
+</div>
+
+<script>
+// 라디오 스타일 토글
+document.querySelectorAll('#imageModeRow .radio-opt').forEach(function(opt){
+  opt.addEventListener('click', function(){
+    document.querySelectorAll('#imageModeRow .radio-opt').forEach(o=>o.classList.remove('active'));
+    opt.classList.add('active');
+    opt.querySelector('input').checked = true;
+    var mode = opt.getAttribute('data-value');
+    document.getElementById('uploadFields').classList.toggle('hidden', mode !== 'upload');
+    document.getElementById('imageGenFields').classList.toggle('hidden', mode !== 'generate');
+  });
+});
+
+document.getElementById('genre').addEventListener('change', function(){
+  document.getElementById('genreCustom').classList.toggle('hidden', this.value !== '기타');
+});
+
+// 사진 업로드 미리보기
+document.getElementById('photoUpload').addEventListener('change', function(e){
+  var file = e.target.files && e.target.files[0];
+  var wrap = document.getElementById('photoPreviewWrap');
+  if(!file){ wrap.classList.add('hidden'); return; }
+  var reader = new FileReader();
+  reader.onload = function(ev){
+    document.getElementById('photoPreview').src = ev.target.result;
+    document.getElementById('photoFileName').textContent = '선택된 파일: ' + file.name;
+    wrap.classList.remove('hidden');
+  };
+  reader.readAsDataURL(file);
+});
+
+// 저장된 API 키 불러오기
+window.addEventListener('DOMContentLoaded', function(){
+  var saved = localStorage.getItem('nanoBananaApiKey');
+  if(saved){ document.getElementById('apiKey').value = saved; }
+});
+
+var genreTagMap = {
+  "트로트": "Korean trot, nostalgic melody, accordion & trumpet",
+  "발라드": "Korean ballad, emotional pop ballad, piano-driven",
+  "락": "Korean rock, driving guitars, powerful rock",
+  "팝": "K-pop, contemporary pop, catchy hook",
+  "가곡": "Korean art song, classical vocal, orchestral",
+  "재즈": "jazz, smooth swing, warm brass",
+  "어쿠스틱": "acoustic, singer-songwriter, warm guitar",
+  "국악/전통풍": "Korean traditional fusion, gugak-inspired, gayageum"
+};
+var moodTagMap = {
+  "신나고 경쾌한": "upbeat, cheerful, bright energy",
+  "잔잔하고 편안한": "calm, gentle, soothing",
+  "뭉클하고 감동적인": "touching, heartfelt, emotional swell",
+  "위로와 응원": "warm, comforting, encouraging",
+  "그리운 / 추억": "nostalgic, wistful, bittersweet",
+  "희망차고 다짐하는": "hopeful, uplifting, determined"
+};
+var toneTagMap = {
+  "맑고 청아한": "clear, bright vocal tone",
+  "허스키하고 깊은": "husky, deep vocal tone",
+  "부드럽고 따뜻한": "soft, warm vocal tone",
+  "파워풀하고 시원한": "powerful, soaring vocal tone",
+  "잔잔하고 나긋한": "gentle, tender vocal tone"
+};
+
+function generatePrompts(){
+  var age = document.getElementById('age').value;
+  var genreSel = document.getElementById('genre').value;
+  var genre = genreSel === '기타' ? (document.getElementById('genreCustom').value || '자유 장르') : genreSel;
+  var mood = document.getElementById('mood').value;
+  var story = document.getElementById('story').value.trim() || '(참가자와 대화하며 사연을 정리해주세요)';
+  var voiceGender = document.getElementById('voiceGender').value;
+  var voiceTone = document.getElementById('voiceTone').value;
+  var imageMode = document.querySelector('input[name=imageMode]:checked').value;
+
+  // ① 가사 프롬프트
+  var lyricsPrompt =
+"다음 정보를 바탕으로 한국어 노랫말(가사)을 써주세요.\n\n" +
+"[참가자 정보]\n" +
+"- 연령대: " + age + "\n" +
+"- 선호 장르: " + genre + "\n" +
+"- 원하는 분위기: " + mood + "\n" +
+"- 목소리 느낌: " + voiceGender + ", " + voiceTone + "\n\n" +
+"[담고 싶은 이야기]\n" + story + "\n\n" +
+"[요청사항]\n" +
+"- 벌스(verse) 2개, 후렴(chorus) 1개 구조로 3분 내외 분량의 노랫말을 작성해주세요.\n" +
+"- " + genre + " 장르의 어법과 리듬감에 맞는 단어와 문장 구조를 사용해주세요.\n" +
+"- '" + mood + "' 분위기가 가사 전반에 자연스럽게 느껴지도록 표현해주세요.\n" +
+"- 위 사연 속 구체적인 사람, 장소, 추억을 자연스럽게 녹여주세요.\n" +
+"- 상투적인 표현보다는 진솔하고 담백한 언어를 사용해주세요.\n" +
+"- 완성된 가사만 출력해주세요 (설명 없이).";
+
+  // ② Suno 프롬프트
+  var genreTag = genreTagMap[genreSel] || (genre + " style");
+  var moodTag = moodTagMap[mood] || mood;
+  var toneTag = toneTagMap[voiceTone] || voiceTone;
+  var sunoPrompt =
+"[Style of Music 입력란에 붙여넣기]\n" +
+genreTag + ", " + moodTag + ", " + toneTag + ", Korean vocals, warm natural production\n\n" +
+"[Song Title 예시]\n" +
+"(사연 속 키워드로 제목을 지어주세요. 예: 그 여름의 바다, 아버지의 커피 등)\n\n" +
+"[Custom Lyrics]\n" +
+"→ ①번에서 생성한 가사를 그대로 붙여넣어주세요.\n\n" +
+"[참고]\n" +
+"보컬 느낌: " + voiceGender + " / " + voiceTone;
+
+  document.getElementById('lyricsPrompt').textContent = lyricsPrompt;
+  document.getElementById('sunoPrompt').textContent = sunoPrompt;
+
+  // ③ 이미지 프롬프트 (나노바나나 선택 시에만)
+  var imageCard = document.getElementById('imagePromptCard');
+  if(imageMode === 'generate'){
+    document.getElementById('imagePrompt').textContent = buildImagePromptText();
+    imageCard.classList.remove('hidden');
+  } else {
+    imageCard.classList.add('hidden');
+  }
+
+  document.getElementById('resultSection').style.display = 'block';
+  document.getElementById('resultSection').scrollIntoView({behavior:'smooth'});
+}
+
+// ③ 이미지 프롬프트 텍스트 생성 (결과 카드와 자동 생성 버튼이 공용으로 사용)
+function buildImagePromptText(){
+  var mood = document.getElementById('mood').value;
+  var story = document.getElementById('story').value.trim() || '따뜻하고 편안한 분위기';
+  var imgColor = document.getElementById('imgColor').value;
+  var imgScene = document.getElementById('imgScene').value.trim();
+  return (
+"다음 분위기를 담은 이미지를 만들어주세요.\n\n" +
+"[분위기]\n" + mood + " 느낌\n\n" +
+"[색감/톤]\n" + imgColor + "\n\n" +
+"[장면]\n" + (imgScene || (story + " 이야기와 어울리는 장면을 자연스럽게 표현")) + "\n\n" +
+"[스타일]\n" +
+"따뜻하고 감성적인 사진 또는 일러스트 톤, 과하지 않은 보정, 영상 삽입용\n\n" +
+"[비율]\n16:9 (가로형, 영상용)"
+  );
+}
+
+// 나노바나나(Gemini) API로 실제 이미지 자동 생성
+async function callNanoBanana(){
+  var keyInput = document.getElementById('apiKey');
+  var key = keyInput.value.trim();
+  var statusEl = document.getElementById('apiStatus');
+  var wrap = document.getElementById('genImageWrap');
+  wrap.classList.add('hidden');
+
+  if(!key){
+    statusEl.textContent = '먼저 Gemini API 키를 입력해주세요. (Google AI Studio에서 발급)';
+    return;
+  }
+  localStorage.setItem('nanoBananaApiKey', key);
+
+  var promptText = buildImagePromptText();
+  statusEl.textContent = '이미지를 생성하는 중이에요... (5~15초 정도 걸려요)';
+
+  try{
+    var res = await fetch('https://generativelanguage.googleapis.com/v1/models/gemini-3.1-flash-image:generateContent', {
+      method: 'POST',
+      headers: { 'x-goog-api-key': key, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{ role: 'user', parts: [{ text: promptText }] }],
+        generationConfig: { responseModalities: ['TEXT', 'IMAGE'] }
+      })
+    });
+    var data = await res.json();
+
+    if(!res.ok){
+      statusEl.textContent = '오류: ' + (data.error && data.error.message ? data.error.message : ('요청 실패 (' + res.status + ')'));
+      return;
+    }
+
+    var parts = (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts) || [];
+    var imgPart = parts.find(function(p){ return p.inlineData || p.inline_data; });
+
+    if(!imgPart){
+      statusEl.textContent = '이미지가 반환되지 않았어요. 프롬프트를 조금 더 구체적으로 적고 다시 시도해주세요.';
+      return;
+    }
+
+    var inline = imgPart.inlineData || imgPart.inline_data;
+    var mime = inline.mimeType || inline.mime_type || 'image/png';
+    var b64 = inline.data;
+    var dataUrl = 'data:' + mime + ';base64,' + b64;
+
+    document.getElementById('genImagePreview').src = dataUrl;
+    document.getElementById('genImageDownload').href = dataUrl;
+    wrap.classList.remove('hidden');
+    statusEl.textContent = '완성했어요! 다운로드 버튼으로 저장해주세요.';
+  } catch(err){
+    statusEl.textContent = '네트워크 오류가 발생했어요: ' + err.message + ' (카페 와이파이 연결을 확인해주세요)';
+  }
+}
+
+function copyBox(id, btn){
+  var text = document.getElementById(id).textContent;
+  function done(){
+    btn.textContent = '복사됨 ✓';
+    btn.classList.add('copied');
+    setTimeout(function(){ btn.textContent='복사하기'; btn.classList.remove('copied'); }, 1500);
+  }
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(done).catch(function(){ fallbackCopy(text, done); });
+  } else {
+    fallbackCopy(text, done);
+  }
+}
+function fallbackCopy(text, cb){
+  var ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.position = 'fixed';
+  ta.style.opacity = '0';
+  document.body.appendChild(ta);
+  ta.focus(); ta.select();
+  try{ document.execCommand('copy'); }catch(e){}
+  document.body.removeChild(ta);
+  cb();
+}
+
+function resetForm(){
+  document.getElementById('story').value = '';
+  document.getElementById('imgScene').value = '';
+  document.getElementById('photoUpload').value = '';
+  document.getElementById('photoPreviewWrap').classList.add('hidden');
+  document.getElementById('genImageWrap').classList.add('hidden');
+  document.getElementById('apiStatus').textContent = '';
+  document.getElementById('resultSection').style.display = 'none';
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+</script>
+</body>
+</html>
