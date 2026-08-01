@@ -206,6 +206,29 @@
       <option>그리운 / 추억</option>
       <option>희망차고 다짐하는</option>
     </select>
+
+    <div class="grid2">
+      <div>
+        <label>가사 언어</label>
+        <select id="language">
+          <option>한국어</option>
+          <option>영어(English)</option>
+        </select>
+      </div>
+      <div>
+        <label>노래 듣는 장소·순간</label>
+        <select id="listenPlace">
+          <option>카페에서</option>
+          <option>잠들기 전 침대에서</option>
+          <option>드라이브할 때</option>
+          <option>캠핑장에서</option>
+          <option>아침 식사할 때</option>
+          <option>산책할 때</option>
+          <option>운동할 때</option>
+          <option>혼자 조용한 밤에</option>
+        </select>
+      </div>
+    </div>
   </div>
 
   <!-- STEP 2 -->
@@ -323,8 +346,8 @@
 
     <div class="steps">
       <b>다음 단계 안내</b><br>
-      1. ①번 프롬프트를 ChatGPT/Claude에 붙여넣어 가사를 만들어요.<br>
-      2. 완성된 가사를 ②번 프롬프트와 함께 Suno에 입력해 노래를 생성해요.<br>
+      1. ①번 프롬프트를 ChatGPT/Claude에 붙여넣으면 [노래 제목]과 [가사]가 함께 나와요.<br>
+      2. Suno에서 Song Title 칸엔 제목을, Custom Lyrics 칸엔 가사를 넣고, Style of Music 칸엔 ②번 프롬프트를 붙여넣어 노래를 생성해요.<br>
       3. (선택) ③번 프롬프트를 위쪽 "이미지 바로 생성하기" 버튼으로 자동 생성하거나, 나노바나나 웹/앱에 직접 붙여넣어요. 참가자 사진을 쓸 경우 4단계의 업로드 파일을 그대로 사용해요.<br>
       4. 음악 파일과 이미지를 영상 편집 툴(캡컷, 브루 등)로 합쳐 mp4를 완성해요.
     </div>
@@ -456,39 +479,43 @@ function generatePrompts(){
   var genreSel = document.getElementById('genre').value;
   var genre = genreSel === '기타' ? (document.getElementById('genreCustom').value || '자유 장르') : genreSel;
   var mood = document.getElementById('mood').value;
+  var language = document.getElementById('language').value;
+  var listenPlace = document.getElementById('listenPlace').value;
   var story = document.getElementById('story').value.trim() || '(참가자와 대화하며 사연을 정리해주세요)';
   var voiceGender = document.getElementById('voiceGender').value;
   var voiceTone = document.getElementById('voiceTone').value;
   var imageMode = document.querySelector('input[name=imageMode]:checked').value;
 
-  // ① 가사 프롬프트
+  // ① 가사 프롬프트 (제목 + 가사 동시 생성)
   var lyricsPrompt =
-"다음 정보를 바탕으로 한국어 노랫말(가사)을 써주세요.\n\n" +
+"다음 정보를 바탕으로 노래 제목과 노랫말(가사)을 함께 써주세요.\n\n" +
 "[참가자 정보]\n" +
 "- 연령대: " + age + "\n" +
 "- 선호 장르: " + genre + "\n" +
 "- 원하는 분위기: " + mood + "\n" +
-"- 목소리 느낌: " + voiceGender + ", " + voiceTone + "\n\n" +
+"- 목소리 느낌: " + voiceGender + ", " + voiceTone + "\n" +
+"- 가사 언어: " + language + "\n" +
+"- 노래를 듣게 될 상황: " + listenPlace + "\n\n" +
 "[담고 싶은 이야기]\n" + story + "\n\n" +
 "[요청사항]\n" +
+"- 가사는 " + language + "로 작성해주세요.\n" +
 "- 벌스(verse) 2개, 후렴(chorus) 1개 구조로 3분 내외 분량의 노랫말을 작성해주세요.\n" +
 "- " + genre + " 장르의 어법과 리듬감에 맞는 단어와 문장 구조를 사용해주세요.\n" +
 "- '" + mood + "' 분위기가 가사 전반에 자연스럽게 느껴지도록 표현해주세요.\n" +
+"- '" + listenPlace + "' 어울리는 톤과 정서를 살려주세요.\n" +
 "- 위 사연 속 구체적인 사람, 장소, 추억을 자연스럽게 녹여주세요.\n" +
 "- 상투적인 표현보다는 진솔하고 담백한 언어를 사용해주세요.\n" +
-"- 완성된 가사만 출력해주세요 (설명 없이).";
+"- 아래 형식 그대로, 다른 설명 없이 출력해주세요:\n\n" +
+"[노래 제목]\n(여기에 제목)\n\n[가사]\n(벌스1)\n\n(후렴)\n\n(벌스2)\n\n(후렴 반복)";
 
-  // ② Suno 프롬프트
+  // ② Suno 프롬프트 (스타일만 — 제목·가사는 ①에서 만든 걸 Suno의 Song Title / Custom Lyrics 칸에 직접 넣으면 됨)
   var genreTag = genreTagMap[genreSel] || (genre + " style");
   var moodTag = moodTagMap[mood] || mood;
   var toneTag = toneTagMap[voiceTone] || voiceTone;
+  var vocalLangTag = (language === '영어(English)') ? 'English vocals' : 'Korean vocals';
   var sunoPrompt =
 "[Style of Music 입력란에 붙여넣기]\n" +
-genreTag + ", " + moodTag + ", " + toneTag + ", Korean vocals, warm natural production\n\n" +
-"[Song Title 예시]\n" +
-"(사연 속 키워드로 제목을 지어주세요. 예: 그 여름의 바다, 아버지의 커피 등)\n\n" +
-"[Custom Lyrics]\n" +
-"→ ①번에서 생성한 가사를 그대로 붙여넣어주세요.\n\n" +
+genreTag + ", " + moodTag + ", " + toneTag + ", " + vocalLangTag + ", warm natural production\n\n" +
 "[참고]\n" +
 "보컬 느낌: " + voiceGender + " / " + voiceTone;
 
