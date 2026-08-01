@@ -143,14 +143,55 @@
       <div>
         <label>노래 취향(장르)</label>
         <select id="genre">
-          <option>트로트</option>
-          <option selected>발라드</option>
-          <option>락</option>
-          <option>팝</option>
-          <option>가곡</option>
-          <option>재즈</option>
-          <option>어쿠스틱</option>
-          <option>국악/전통풍</option>
+          <optgroup label="트로트">
+            <option>정통 트로트</option>
+            <option>세미 트로트</option>
+            <option>트로트 발라드</option>
+          </optgroup>
+          <optgroup label="발라드">
+            <option selected>감성 발라드</option>
+            <option>팝 발라드</option>
+            <option>어쿠스틱 발라드</option>
+            <option>드라마 OST 발라드</option>
+            <option>록 발라드</option>
+          </optgroup>
+          <optgroup label="팝">
+            <option>이지팝</option>
+            <option>이모셔널 이지팝</option>
+            <option>트로피컬 이지팝</option>
+            <option>시티팝</option>
+            <option>드림팝</option>
+            <option>신스팝(레트로)</option>
+            <option>베드룸팝</option>
+          </optgroup>
+          <optgroup label="락">
+            <option>모던 록</option>
+            <option>팝 펑크</option>
+            <option>인디 록</option>
+            <option>헤비 메탈</option>
+          </optgroup>
+          <optgroup label="재즈">
+            <option>스무스 재즈</option>
+            <option>스윙 재즈</option>
+            <option>보사노바</option>
+            <option>쿨 재즈</option>
+          </optgroup>
+          <optgroup label="어쿠스틱">
+            <option>통기타 발라드</option>
+            <option>싱어송라이터</option>
+            <option>포크</option>
+            <option>인디 포크</option>
+          </optgroup>
+          <optgroup label="가곡">
+            <option>한국 가곡</option>
+            <option>클래식 아리아풍</option>
+            <option>합창풍</option>
+          </optgroup>
+          <optgroup label="국악/전통풍">
+            <option>국악 퓨전</option>
+            <option>판소리풍</option>
+            <option>가야금 연주풍</option>
+          </optgroup>
           <option value="기타">기타(직접 입력)</option>
         </select>
         <input type="text" id="genreCustom" class="hidden" placeholder="원하는 장르를 적어주세요" style="margin-top:8px;">
@@ -352,14 +393,47 @@ function clearApiKey(){
 }
 
 var genreTagMap = {
-  "트로트": "Korean trot, nostalgic melody, accordion & trumpet",
-  "발라드": "Korean ballad, emotional pop ballad, piano-driven",
-  "락": "Korean rock, driving guitars, powerful rock",
-  "팝": "K-pop, contemporary pop, catchy hook",
-  "가곡": "Korean art song, classical vocal, orchestral",
-  "재즈": "jazz, smooth swing, warm brass",
-  "어쿠스틱": "acoustic, singer-songwriter, warm guitar",
-  "국악/전통풍": "Korean traditional fusion, gugak-inspired, gayageum"
+  // 트로트
+  "정통 트로트": "Authentic Korean Trot, 2/4 trot rhythm, pentatonic scale, soulful vocal with kkeok-gi, accordion lead",
+  "세미 트로트": "Modern Semi-Trot, K-Pop dance beat, polished vocals, synthesizer brass, driving bassline, upbeat",
+  "트로트 발라드": "Slow Trot Ballad, emotional vocal with kkeok-gi, strings, nostalgic mood",
+  // 발라드
+  "감성 발라드": "Emotional Piano Ballad, soaring vocals, piano-led melody, string pads",
+  "팝 발라드": "Korean Pop Ballad, warm vocals, string arrangement, emotional chorus",
+  "어쿠스틱 발라드": "Acoustic Pop Ballad, heartfelt vocals, acoustic guitar, gentle piano melody",
+  "드라마 OST 발라드": "K-Drama Ballad, soaring vocals, piano-led melody, string pads, emotional climax",
+  "록 발라드": "Korean Rock Ballad, soaring guitar solo, emotional build, anthemic chorus",
+  // 팝
+  "이지팝": "Easy Listening Pop, laid-back groove, warm synths, smooth vocals, relaxed tempo",
+  "이모셔널 이지팝": "Emotional Easy Pop, sentimental lyrics, soft piano, warm vocal layers, gentle build",
+  "트로피컬 이지팝": "Tropical Easy Pop, tropical house influence, marimba, light percussion, breezy summer vibe",
+  "시티팝": "City Pop, glossy synths, slap bass, chorus guitar, breezy vibe",
+  "드림팝": "Dream Pop, jangly guitar reverb, breathy vocals, nostalgic",
+  "신스팝(레트로)": "80s Synth-Pop, Retrowave, analog synths, gated reverb drums, nostalgic pads",
+  "베드룸팝": "Bedroom Pop, lo-fi production, intimate vocals, soft synths, DIY aesthetic",
+  // 락
+  "모던 록": "Modern Rock, alternative, crunchy riffs, anthemic chorus",
+  "팝 펑크": "Pop Punk, uptempo power chords, catchy hooks, energetic drums",
+  "인디 록": "Indie Rock, jangly guitars, melodic bassline, raw heartfelt vocals",
+  "헤비 메탈": "Heavy Metal, distorted riffs, double-kick drums, shredding solos",
+  // 재즈
+  "스무스 재즈": "Smooth Jazz, soprano sax, soft piano, polished production",
+  "스윙 재즈": "Swing Jazz, walking bass, brass, ride cymbal swing",
+  "보사노바": "Bossa Nova, nylon guitar, samba rhythm, jazz chords",
+  "쿨 재즈": "Cool Jazz, airy horns, brushed drums, modal harmony",
+  // 어쿠스틱
+  "통기타 발라드": "Acoustic Guitar Ballad, warm fingerpicking, intimate vocals",
+  "싱어송라이터": "Singer-Songwriter, intimate vocal, acoustic guitar, sparse arrangement",
+  "포크": "Folk, acoustic fingerpicking, narrative lyrics, harmonica",
+  "인디 포크": "Indie Folk, warm acoustic textures, gentle harmonies, storytelling",
+  // 가곡
+  "한국 가곡": "Korean art song, classical vocal, orchestral",
+  "클래식 아리아풍": "Classical Aria style, operatic vocal, orchestral accompaniment, dramatic dynamics",
+  "합창풍": "Choral, ensemble vocals, orchestral, uplifting harmony",
+  // 국악/전통풍
+  "국악 퓨전": "Korean traditional fusion, gugak-inspired, gayageum",
+  "판소리풍": "Pansori style, traditional Korean vocal technique, buk drum accompaniment, storytelling",
+  "가야금 연주풍": "Gayageum instrumental, traditional Korean strings, delicate plucking, meditative"
 };
 var moodTagMap = {
   "신나고 경쾌한": "upbeat, cheerful, bright energy",
